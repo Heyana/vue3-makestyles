@@ -5,26 +5,26 @@ import type { Spacing } from "./spacing.types";
 import type { ThemeUnitOptions } from "./themeUnit.types";
 import type { CreateCSSProperties } from "./styles.types";
 
-export type InitialObject<V = any> = Record<string, V>;
+export type InitialObject<V = any, K extends string = string> = Record<K, V>;
 
 export interface CSSOptions {
-  [k: string]: CreateCSSProperties
+  [k: string]: CreateCSSProperties;
 }
 
 export type Palette = InitialObject;
 
 export interface ThemeOptions {
   shape?: ShapeOptions;
-  breakpoints?: BreakpointsOptions
+  breakpoints?: BreakpointsOptions;
   mixins?: MixinsOptions;
   palette?: Palette;
   spacing?: Spacing;
   themeUnit?: ThemeUnitOptions;
   css?: CSSOptions;
-  numericalCSS?: string[]
+  numericalCSS?: string[];
 }
 
-export interface Theme extends InitialObject{
+export interface Theme extends InitialObject {
   breakpoints: Breakpoints;
   palette: Palette;
   shape: Shape;

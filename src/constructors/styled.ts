@@ -1,46 +1,66 @@
-import * as Vue from "vue"
+import * as Vue from "vue";
 import makeStyles from "./makeStyles";
 import type * as Styles from "../types/index.types";
 
-interface StyledProps { [key: string]: Vue.Prop<unknown> }
+interface StyledProps {
+  [key: string]: Vue.Prop<unknown>;
+}
 
-function styled(component: any, propDefinitions: Vue.ExtractPropTypes<StyledProps> = {}) {
-  const componentProps = component.props as Vue.ExtractPropTypes<StyledProps>
-  const name = component.name
+function styled(
+  component: any,
+  propDefinitions: Vue.ExtractPropTypes<StyledProps> = {}
+) {
+  const componentProps = component.props as Vue.ExtractPropTypes<StyledProps>;
+  const name = component.name;
 
-  const componentDefinitionsKeys = componentProps ? Object.keys(componentProps) : []
+  const componentDefinitionsKeys = componentProps
+    ? Object.keys(componentProps)
+    : [];
 
-  const combinedPropTypes = (componentProps ? { ...componentProps, ...propDefinitions } : propDefinitions)
+  const combinedPropTypes = componentProps
+    ? { ...componentProps, ...propDefinitions }
+    : propDefinitions;
 
   const createStyledComponent = (
-    styles: Styles.CreateCSSProperties | ((theme: Styles.Theme, props: Styles.InitialObject) => Styles.CreateCSSProperties),
+    styles:
+      | Styles.CreateCSSProperties
+      | ((
+          theme: Styles.Theme,
+          props: Styles.InitialObject
+        ) => Styles.CreateCSSProperties),
     options: Styles.MakeStylesOptions = {}
   ): Vue.DefineComponent<typeof combinedPropTypes> => {
     const stylesOrCreator =
-      typeof styles === 'function'
-        ? (theme: Styles.Theme, props: Styles.InitialObject = {}) => ({ root: styles(theme, props) })
+      typeof styles === "function"
+        ? (theme: Styles.Theme, props: Styles.InitialObject = {}) => ({
+            root: styles(theme, props),
+          })
         : { root: styles };
 
-    const useStyles = makeStyles(stylesOrCreator, { name, isStyled: true, ...options })
+    const useStyles = makeStyles(stylesOrCreator, {
+      name,
+      isStyled: true,
+      ...options,
+    });
 
     return Vue.defineComponent({
       props: {
         modelValue: null,
-        ...combinedPropTypes
+        ...combinedPropTypes,
       },
 
-      emits: ['input', 'update:modelValue'],
+      emits: ["input", "update:modelValue"],
 
-      setup(props, { slots, attrs, emit }: Vue.SetupContext) {
-        const classes = useStyles(props)
+      setup(props: any, { slots, attrs, emit }: any) {
+        const classes = useStyles(props);
 
         return () => {
-          const targetProps: Styles.InitialObject = {}
+          const targetProps: Styles.InitialObject = {};
 
           if (componentDefinitionsKeys.length) {
             for (const [key, value] of Object.entries(props)) {
               if (componentDefinitionsKeys.includes(key)) {
-                targetProps[key] = value
+                targetProps[key] = value;
               }
             }
           }
@@ -53,18 +73,18 @@ function styled(component: any, propDefinitions: Vue.ExtractPropTypes<StyledProp
               ...targetProps,
               class: classes.root,
               onInput: (e: any) => {
-                emit('update:modelValue', e.target.value)
-                emit('input', e)
-              }
+                emit("update:modelValue", e.target.value);
+                emit("input", e);
+              },
             },
             slots
-          )
-        }
-      }
-    })
-  }
+          );
+        };
+      },
+    }) as any;
+  };
 
-  return createStyledComponent
+  return createStyledComponent;
 }
 
-export default styled
+export default styled;
