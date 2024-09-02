@@ -139,6 +139,57 @@ function makeStyleMap<T extends string = string>(
 
   return useStyles;
 }
+function createDefClass(
+  stylesOrCreator: Styles.StylesCSSOptions,
+  options: Styles.MakeStylesOptions = {}
+) {
+  const {
+    name = "",
+    classNamePrefix: classNamePrefixOption,
+    defaultTheme = emptyTheme,
+    isHashClassName = true,
+    isStyled = false,
+  } = options;
+  const classNamePrefix = name || classNamePrefixOption || tagName;
+  const creatorParams = {
+    name,
+    classNamePrefix,
+    isHashClassName,
+    stylesCreator: {
+      def: stylesOrCreator,
+    },
+    isStyled,
+  };
+  const stylesCreator = new StylesCreator(creatorParams);
+  const css = new CSS(stylesCreator.getOptions());
 
-export { makeStyleMap };
+  const useStyles = (
+    props: Vue.ExtractPropTypes<Styles.InitialObject> = {}
+  ): Styles.InitialObject<any, "def"> => {
+    const theme = useTheme() || defaultTheme;
+    stylesCreator.updateOptions({
+      unit: theme.themeUnit?.unit ?? "px",
+      numericalCSS: theme.numericalCSS,
+    });
+
+    const classNames = Vue.reactive<Styles.InitialObject>({});
+
+    Vue.watchEffect(() => {
+      const current = {
+        theme,
+        stylesCreator,
+        css,
+        classNames,
+      };
+
+      effectClasses(current, props);
+    });
+
+    return classNames;
+  };
+
+  return useStyles().def;
+}
+
+export { makeStyleMap, createDefClass };
 export default makeStyles;
