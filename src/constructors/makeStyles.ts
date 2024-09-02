@@ -61,26 +61,32 @@ function makeStyles(
   const stylesCreator = new StylesCreator(creatorParams);
   const css = new CSS(stylesCreator.getOptions());
 
-  const props: Vue.ExtractPropTypes<Styles.InitialObject> = {};
+  const useStyles = (
+    props: Vue.ExtractPropTypes<Styles.InitialObject> = {}
+  ) => {
+    const theme = useTheme() || defaultTheme;
+    stylesCreator.updateOptions({
+      unit: theme.themeUnit?.unit ?? "px",
+      numericalCSS: theme.numericalCSS,
+    });
 
-  const theme = useTheme() || defaultTheme;
-  stylesCreator.updateOptions({
-    unit: theme.themeUnit?.unit ?? "px",
-    numericalCSS: theme.numericalCSS,
-  });
+    const classNames = Vue.reactive<Styles.InitialObject>({});
 
-  const classNames = Vue.reactive<Styles.InitialObject>({});
+    Vue.watchEffect(() => {
+      const current = {
+        theme,
+        stylesCreator,
+        css,
+        classNames,
+      };
 
-  const current = {
-    theme,
-    stylesCreator,
-    css,
-    classNames,
+      effectClasses(current, props);
+    });
+
+    return classNames;
   };
 
-  effectClasses(current, props);
-
-  return classNames;
+  return useStyles;
 }
 function makeStyleMap<T extends string = string>(
   stylesOrCreator: {
