@@ -22,7 +22,10 @@ export { default as styled } from "./constructors/styled";
 
 export * as Styles from "./types/index.types";
 
-import makeStyles, { makeStyleMap } from "./constructors/makeStyles";
+import makeStyles, {
+  makeStyleMap,
+  createDefClass,
+} from "./constructors/makeStyles";
 
-export { makeStyleMap };
+export { makeStyleMap, createDefClass };
 export default makeStyles;
